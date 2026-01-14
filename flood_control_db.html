@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flood Control Corruption Database</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: #0a4d8c;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        .controls {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            background: #e3e3e3;
+        }
+        table {
+            width: 95%;
+            margin: 1rem auto;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            background: #0a4d8c;
+            color: white;
+        }
+        input, select {
+            padding: 0.5rem;
+            font-size: 1rem;
+        }
+        button {
+            padding: 0.3rem 0.5rem;
+            background: #0a4d8c;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover {
+            background: #062d50;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Flood Control Corruption Database</h1>
+    </header>
+
+    <section class="controls">
+        <label for="category">Filter by Category:</label>
+        <select id="category">
+            <option value="all">All</option>
+            <option value="contractor">Contractors & Companies</option>
+            <option value="personnel">DPWH Officials & Staff</option>
+            <option value="operators">Leading Operators / Politicians</option>
+        </select>
+
+        <label for="search">Search:</label>
+        <input type="text" id="search" placeholder="Search by name, company, region, or amount">
+    </section>
+
+    <table id="database">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Name / Company</th>
+                <th>Owner / Role</th>
+                <th>Notes / Allegation</th>
+                <th>Amount (₱)</th>
+                <th>Year</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        const data = [
+            {category:'contractor',name:'Legacy Construction Corp.',owner:'—',notes:'Among top 15 contractors',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'Alpha & Omega Gen. Contractor & Dev. Corp.',owner:'Discaya family links',notes:'Top contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'St. Timothy Construction Corp.',owner:'Pacifico "Curlee" & Sarah Discaya',notes:'Ghost/substandard project implementer',amount:'Part of ~₱100B + project ₱96.5M',year:''},
+            {category:'contractor',name:'Centerways Construction & Dev., Inc.',owner:'—',notes:'Top 15 contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'EGB Construction Corp.',owner:'—',notes:'Top 15 contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'QM Builders',owner:'—',notes:'Top 15 contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'Topnotch Catalyst Builders Inc.',owner:'—',notes:'Top 15 contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'Sunwest, Inc.',owner:'—',notes:'Top 15 contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'Hi-Tone Construction & Dev. Corp.',owner:'—',notes:'Top 15 contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'Triple 8 Construction & Supply, Inc.',owner:'—',notes:'Top 15 contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'Royal Crown Monarch Construction & Supplies Corp.',owner:'—',notes:'Top 15 contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'Road Edge Trading & Dev. Services',owner:'—',notes:'Top 15 contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'MG Samidan Construction',owner:'—',notes:'Top 15 contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'L.R. Tiqui Builders, Inc.',owner:'—',notes:'Top 15 contractor',amount:'Part of ~₱100B',year:''},
+            {category:'contractor',name:'SYMS Construction Trading',owner:'Sally Santos',notes:'Named in asset probe',amount:'No exact amount publicly reported',year:''},
+            {category:'contractor',name:'IM Construction Corp.',owner:'Robert Imperio',notes:'Named in asset probe',amount:'No amount publicly reported',year:''},
+            {category:'personnel',name:'Brice Ericson Hernandez',owner:'Former DPWH OIC-Assistant District Engineer',notes:'Named in assets probe',amount:'N/A',year:''},
+            {category:'personnel',name:'Jaypee Mendoza',owner:'Former DPWH OIC-Assistant District Engineer',notes:'Named in assets probe',amount:'N/A',year:''},
+            {category:'personnel',name:'John Michael Ramos',owner:'DPWH Construction Section Chief',notes:'Named in assets probe',amount:'N/A',year:''},
+            {category:'personnel',name:'Ernesto Galang',owner:'DPWH Planning & Design',notes:'Named in assets probe',amount:'N/A',year:''},
+            {category:'operators',name:'Henry Alcantara',owner:'Former DPWH Bulacan 1st District Engineer',notes:'Surrendered kickbacks to become state witness',amount:'₱181,000,000',year:'2025'},
+            {category:'operators',name:'DPWH NCR Director (unnamed)',owner:'DPWH National Capital Region Director',notes:'Surrendered alleged kickbacks',amount:'₱40,000,000',year:'Dec 2025'},
+            {category:'operators',name:'Roberto Bernardo',owner:'Former DPWH Undersecretary',notes:'Turned over funds to government (freeze orders)',amount:'₱7,000,000',year:'2025'},
+            {category:'operators',name:'Francis “Chiz” Escudero',owner:'Senator (Political)',notes:'Admitted receiving campaign funds from contractor',amount:'₱30,000,000',year:'Reported 2025'}
+        ];
+
+        function renderTable(filterCategory = 'all', searchTerm = '') {
+            const tbody = document.querySelector('#database tbody');
+            tbody.innerHTML = '';
+
+            const filtered = data.filter(entry => {
+                const categoryMatch = filterCategory === 'all' || entry.category === filterCategory;
+                const searchMatch = Object.values(entry).some(val => val.toLowerCase().includes(searchTerm.toLowerCase()));
+                return categoryMatch && searchMatch;
+            });
+
+            filtered.forEach((entry, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${entry.category}</td>
+                    <td>${entry.name}</td>
+                    <td>${entry.owner}</td>
+                    <td>${entry.notes}</td>
+                    <td>${entry.amount}</td>
+                    <td>${entry.year}</td>
+                    <td><button onclick="editEntry(${index})">Edit</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function editEntry(index) {
+            const entry = data[index];
+            const newName = prompt('Edit Name/Company:', entry.name);
+            const newOwner = prompt('Edit Owner/Role:', entry.owner);
+            const newNotes = prompt('Edit Notes/Allegation:', entry.notes);
+            const newAmount = prompt('Edit Amount (₱):', entry.amount);
+            const newYear = prompt('Edit Year:', entry.year);
+
+            if(newName) entry.name = newName;
+            if(newOwner) entry.owner = newOwner;
+            if(newNotes) entry.notes = newNotes;
+            if(newAmount) entry.amount = newAmount;
+            if(newYear) entry.year = newYear;
+
+            renderTable(document.getElementById('category').value, document.getElementById('search').value);
+        }
+
+        document.getElementById('category').addEventListener('change', (e) => {
+            renderTable(e.target.value, document.getElementById('search').value);
+        });
+
+        document.getElementById('search').addEventListener('input', (e) => {
+            renderTable(document.getElementById('category').value, e.target.value);
+        });
+
+        renderTable();
+    </script>
+</body>
+</html>
